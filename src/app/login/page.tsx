@@ -7,7 +7,8 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { toast } from "@/hooks/use-toast"
-import { Sparkles } from "lucide-react"
+import { Sparkles, ArrowLeft } from "lucide-react"
+import Link from "next/link"
 
 export default function LoginPage() {
   const [isLogin, setIsLogin] = useState(true)
@@ -19,12 +20,18 @@ export default function LoginPage() {
       title: isLogin ? "Welcome back!" : "Account created!",
       description: "Redirecting you to your feed...",
     })
-    setTimeout(() => router.push("/"), 1500)
+    setTimeout(() => router.push("/feed"), 1500)
   }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background px-4">
       <div className="w-full max-w-md space-y-8">
+        <div className="absolute top-4 left-4">
+          <Button variant="ghost" asChild className="gap-2">
+            <Link href="/"><ArrowLeft className="h-4 w-4" /> Back</Link>
+          </Button>
+        </div>
+
         <div className="text-center">
           <div className="inline-flex p-4 rounded-2xl bg-primary/10 text-primary mb-4">
              <Sparkles className="h-10 w-10" />

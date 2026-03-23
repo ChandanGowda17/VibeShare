@@ -1,97 +1,72 @@
 "use client"
 
-import { Navbar, MobileNav } from "@/components/Navigation"
-import { PostCard } from "@/components/PostCard"
-import { CreatePost } from "@/components/CreatePost"
-import { ScrollArea } from "@/components/ui/scroll-area"
+import Link from "next/link"
+import { Button } from "@/components/ui/button"
+import { Sparkles, Image as ImageIcon, Mic, Share2, ArrowRight } from "lucide-react"
 
-const MOCK_POSTS = [
-  {
-    id: "1",
-    user: {
-      name: "Alex Rivera",
-      handle: "arivera",
-      avatar: "https://picsum.photos/seed/u1/100/100"
-    },
-    content: {
-      type: "image" as const,
-      url: "https://picsum.photos/seed/creativity1/600/800",
-      caption: "Chasing color and light in the concrete jungle. 🎨✨",
-      hashtags: ["urbanart", "creativity", "vibes"]
-    },
-    likes: 1240,
-    isLiked: true
-  },
-  {
-    id: "2",
-    user: {
-      name: "Sarah Chen",
-      handle: "schen_music",
-      avatar: "https://picsum.photos/seed/u2/100/100"
-    },
-    content: {
-      type: "audio" as const,
-      url: "",
-      caption: "New melody I'm working on for the weekend set. Let me know what you think!",
-      hashtags: ["newmusic", "audio", "vibeshare"]
-    },
-    likes: 856,
-    isLiked: false
-  },
-  {
-    id: "3",
-    user: {
-      name: "Jordan Fox",
-      handle: "jfox",
-      avatar: "https://picsum.photos/seed/u3/100/100"
-    },
-    content: {
-      type: "image" as const,
-      url: "https://picsum.photos/seed/nature1/600/600",
-      caption: "Peace is found in the stillness of the peaks.",
-      hashtags: ["adventure", "minimal", "peace"]
-    },
-    likes: 2102,
-    isLiked: false
-  }
-]
-
-export default function Home() {
+export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-background pb-20 md:pb-0">
-      <Navbar />
-      
-      <main className="mx-auto max-w-screen-md px-4 py-6">
-        <div className="flex flex-col gap-6">
-          {/* Stories placeholder for IG feel */}
-          <div className="flex space-x-4 overflow-x-auto pb-4 no-scrollbar">
-            {Array.from({ length: 8 }).map((_, i) => (
-              <div key={i} className="flex flex-col items-center space-y-1 flex-shrink-0">
-                <div className="h-16 w-16 rounded-full p-0.5 bg-gradient-to-tr from-[#9372DB] to-[#285DCE]">
-                  <div className="h-full w-full rounded-full bg-white p-0.5">
-                    <img 
-                      src={`https://picsum.photos/seed/s${i}/100/100`} 
-                      className="h-full w-full rounded-full object-cover" 
-                      alt="Story"
-                    />
-                  </div>
-                </div>
-                <span className="text-[10px] text-muted-foreground">User {i + 1}</span>
-              </div>
-            ))}
+    <div className="min-h-screen bg-background flex flex-col">
+      {/* Hero Section */}
+      <main className="flex-1 flex flex-col items-center justify-center px-4 text-center space-y-8 max-w-3xl mx-auto">
+        <div className="inline-flex p-4 rounded-3xl bg-primary/10 text-primary animate-bounce-slow">
+          <Sparkles className="h-12 w-12" />
+        </div>
+        
+        <div className="space-y-4">
+          <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-primary font-headline">
+            VibeShare
+          </h1>
+          <p className="text-xl md:text-2xl text-muted-foreground font-medium">
+            Connect. Create. Inspire.
+          </p>
+          <p className="text-muted-foreground max-w-lg mx-auto">
+            The modern social experience for sharing your creativity through high-fidelity photos, 
+            immersive audio, and authentic moments.
+          </p>
+        </div>
+
+        <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+          <Button asChild size="lg" className="h-14 px-8 text-lg font-bold rounded-2xl shadow-lg shadow-primary/20">
+            <Link href="/login">Get Started</Link>
+          </Button>
+          <Button asChild variant="outline" size="lg" className="h-14 px-8 text-lg font-bold rounded-2xl border-primary/20 hover:bg-primary/5">
+            <Link href="/login">Sign In</Link>
+          </Button>
+        </div>
+
+        {/* Feature Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-12 w-full">
+          <div className="p-6 rounded-2xl bg-white/50 border border-primary/10 flex flex-col items-center space-y-3">
+            <div className="p-3 rounded-xl bg-accent/10 text-accent">
+              <ImageIcon className="h-6 w-6" />
+            </div>
+            <h3 className="font-bold">Visual Vibes</h3>
+            <p className="text-sm text-muted-foreground">Share stunning photos with AI-powered enhancements.</p>
           </div>
-
-          <CreatePost />
-
-          <div className="space-y-6">
-            {MOCK_POSTS.map((post) => (
-              <PostCard key={post.id} {...post} />
-            ))}
+          <div className="p-6 rounded-2xl bg-white/50 border border-primary/10 flex flex-col items-center space-y-3">
+            <div className="p-3 rounded-xl bg-primary/10 text-primary">
+              <Mic className="h-6 w-6" />
+            </div>
+            <h3 className="font-bold">Audio Moments</h3>
+            <p className="text-sm text-muted-foreground">Express yourself with high-quality voice snippets.</p>
+          </div>
+          <div className="p-6 rounded-2xl bg-white/50 border border-primary/10 flex flex-col items-center space-y-3">
+            <div className="p-3 rounded-xl bg-green-500/10 text-green-600">
+              <Share2 className="h-6 w-6" />
+            </div>
+            <h3 className="font-bold">Social Magic</h3>
+            <p className="text-sm text-muted-foreground">Connect with creators around the globe instantly.</p>
           </div>
         </div>
       </main>
 
-      <MobileNav />
+      {/* Footer */}
+      <footer className="p-8 text-center border-t bg-white/30 backdrop-blur-sm">
+        <p className="text-sm text-muted-foreground">
+          © 2024 VibeShare. All rights reserved. Built for creators.
+        </p>
+      </footer>
     </div>
   )
 }

@@ -48,7 +48,7 @@ export function Navbar() {
   return (
     <nav className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-md">
       <div className="mx-auto flex h-14 max-w-screen-md items-center justify-between px-4">
-        <Link href="/" className="flex items-center space-x-2">
+        <Link href="/feed" className="flex items-center space-x-2">
           <span className="text-xl font-bold tracking-tight text-primary font-headline">VibeShare</span>
         </Link>
         <div className="flex items-center space-x-2">
@@ -69,7 +69,7 @@ export function MobileNav() {
   const pathname = usePathname()
 
   const navItems = [
-    { icon: Home, href: "/", label: "Home" },
+    { icon: Home, href: "/feed", label: "Home" },
     { icon: Search, href: "/explore", label: "Explore" },
     { icon: PlusSquare, href: "/create", label: "Create" },
     { icon: MessageCircle, href: "/chat", label: "Chat" },
