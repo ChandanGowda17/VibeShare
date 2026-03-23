@@ -1,3 +1,40 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "1",
+      "description": "Abstract colorful splash representing creativity",
+      "imageUrl": "https://picsum.photos/seed/creativity1/600/800",
+      "imageHint": "colorful abstract creativity"
+    },
+    {
+      "id": "2",
+      "description": "Minimalist mountain landscape",
+      "imageUrl": "https://picsum.photos/seed/nature1/600/600",
+      "imageHint": "minimal mountain landscape"
+    },
+    {
+      "id": "3",
+      "description": "A warm coffee shop setting",
+      "imageUrl": "https://picsum.photos/seed/vibe1/600/750",
+      "imageHint": "cozy cafe vibes"
+    },
+    {
+      "id": "4",
+      "description": "Modern urban architecture",
+      "imageUrl": "https://picsum.photos/seed/city1/600/600",
+      "imageHint": "modern city architecture"
+    },
+    {
+      "id": "user1",
+      "description": "Profile picture 1",
+      "imageUrl": "https://picsum.photos/seed/u1/100/100",
+      "imageHint": "portrait person"
+    },
+    {
+      "id": "user2",
+      "description": "Profile picture 2",
+      "imageUrl": "https://picsum.photos/seed/u2/100/100",
+      "imageHint": "portrait person"
+    }
+  ]
 }
