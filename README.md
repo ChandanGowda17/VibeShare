@@ -42,3 +42,11 @@ VibeShare is a modern social media prototype designed for creators. Share your v
 ## 📄 License
 
 This project is licensed under the MIT License.
+
+
+git init
+git add .
+git commit -m "Initial commit from VibeShare prototype"
+git branch -M main
+git remote add origin https://github.com/ChandanGowda17/VibeShare.git
+git push -u origin main
