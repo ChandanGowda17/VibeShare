@@ -1,0 +1,471 @@
+{
+  "entities": {
+    "UserProfile": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "UserProfile",
+      "type": "object",
+      "description": "Stores public profile information for a user in the VibeShare application. Authentication is handled externally (Firebase), so no authentication-sensitive data is stored here.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the UserProfile entity."
+        },
+        "username": {
+          "type": "string",
+          "description": "A unique, public-facing username for the user."
+        },
+        "email": {
+          "type": "string",
+          "description": "The user's email address.",
+          "format": "email"
+        },
+        "profilePictureUrl": {
+          "type": "string",
+          "description": "URL to the user's profile picture.",
+          "format": "uri"
+        },
+        "bio": {
+          "type": "string",
+          "description": "A short biographical description of the user."
+        },
+        "followerIds": {
+          "type": "array",
+          "description": "An array of UserProfile IDs that follow this user. (Relationship: UserProfile N:N UserProfile - Followers)",
+          "items": {
+            "type": "string"
+          }
+        },
+        "followingIds": {
+          "type": "array",
+          "description": "An array of UserProfile IDs that this user is following. (Relationship: UserProfile N:N UserProfile - Following)",
+          "items": {
+            "type": "string"
+          }
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the user profile was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the user profile was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "username",
+        "createdAt"
+      ]
+    },
+    "MediaPost": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "MediaPost",
+      "type": "object",
+      "description": "Represents a single piece of shared media (photo, video, or audio) by a user.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the MediaPost entity."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to the UserProfile who posted the media. (Relationship: UserProfile 1:N MediaPost)"
+        },
+        "mediaType": {
+          "type": "string",
+          "description": "The type of media (e.g., 'image', 'video', 'audio')."
+        },
+        "mediaUrl": {
+          "type": "string",
+          "description": "URL to the actual media file.",
+          "format": "uri"
+        },
+        "thumbnailUrl": {
+          "type": "string",
+          "description": "URL to a thumbnail image for video or audio media.",
+          "format": "uri"
+        },
+        "caption": {
+          "type": "string",
+          "description": "User-provided text description for the media post."
+        },
+        "hashtags": {
+          "type": "array",
+          "description": "An array of hashtags associated with the post.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "aiSuggestedCaption": {
+          "type": "string",
+          "description": "AI-generated caption suggestion for the media post."
+        },
+        "aiSuggestedHashtags": {
+          "type": "array",
+          "description": "AI-generated hashtag suggestions for the media post.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "location": {
+          "type": "string",
+          "description": "Optional geographical location associated with the post."
+        },
+        "isPrivate": {
+          "type": "boolean",
+          "description": "Indicates if the media post is private (true) or public (false)."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the media post was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the media post was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "mediaType",
+        "mediaUrl",
+        "createdAt"
+      ]
+    },
+    "Comment": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Comment",
+      "type": "object",
+      "description": "Represents a comment made by a user on a specific media post.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Comment entity."
+        },
+        "mediaPostId": {
+          "type": "string",
+          "description": "Reference to the MediaPost the comment belongs to. (Relationship: MediaPost 1:N Comment)"
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to the UserProfile who made the comment. (Relationship: UserProfile 1:N Comment)"
+        },
+        "text": {
+          "type": "string",
+          "description": "The textual content of the comment."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the comment was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the comment was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "mediaPostId",
+        "userId",
+        "text",
+        "createdAt"
+      ]
+    },
+    "Like": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Like",
+      "type": "object",
+      "description": "Represents a user's 'like' or 'reaction' to a media post.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Like entity."
+        },
+        "mediaPostId": {
+          "type": "string",
+          "description": "Reference to the MediaPost that was liked. (Relationship: MediaPost 1:N Like)"
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to the UserProfile who liked the post. (Relationship: UserProfile 1:N Like)"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the like was created.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "mediaPostId",
+        "userId",
+        "createdAt"
+      ]
+    },
+    "Conversation": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Conversation",
+      "type": "object",
+      "description": "Represents a private chat conversation between two or more users.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Conversation entity."
+        },
+        "participantIds": {
+          "type": "array",
+          "description": "An array of UserProfile IDs involved in this conversation. (Relationship: UserProfile N:N Conversation)",
+          "items": {
+            "type": "string"
+          }
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the conversation was initiated.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the conversation was last updated (e.g., by a new message).",
+          "format": "date-time"
+        },
+        "lastMessageId": {
+          "type": "string",
+          "description": "Reference to the ID of the last message in this conversation for quick access. (Relationship: Conversation 1:1 ChatMessage - last message)"
+        }
+      },
+      "required": [
+        "id",
+        "participantIds",
+        "createdAt"
+      ]
+    },
+    "ChatMessage": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "ChatMessage",
+      "type": "object",
+      "description": "Represents a single text message within a chat conversation.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the ChatMessage entity."
+        },
+        "conversationId": {
+          "type": "string",
+          "description": "Reference to the Conversation this message belongs to. (Relationship: Conversation 1:N ChatMessage)"
+        },
+        "senderId": {
+          "type": "string",
+          "description": "Reference to the UserProfile who sent this message. (Relationship: UserProfile 1:N ChatMessage)"
+        },
+        "text": {
+          "type": "string",
+          "description": "The textual content of the message."
+        },
+        "sentAt": {
+          "type": "string",
+          "description": "Timestamp when the message was sent.",
+          "format": "date-time"
+        },
+        "isRead": {
+          "type": "boolean",
+          "description": "Indicates if the message has been read by the recipient(s)."
+        }
+      },
+      "required": [
+        "id",
+        "conversationId",
+        "senderId",
+        "text",
+        "sentAt"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/users/{userId}",
+        "definition": {
+          "entityName": "UserProfile",
+          "schema": {
+            "$ref": "#/backend/entities/UserProfile"
+          },
+          "description": "Stores public profile information for a user. The document ID (`userId`) MUST match the Firebase Authentication UID. Access: readable by all authenticated users, writable only by the profile owner (`request.auth.uid`)."
+        }
+      },
+      {
+        "path": "/public_posts/{postId}",
+        "definition": {
+          "entityName": "MediaPost",
+          "schema": {
+            "$ref": "#/backend/entities/MediaPost"
+          },
+          "description": "Contains media posts explicitly marked as public (`isPrivate: false`). Readable by all authenticated users. Writable/deletable by the post's `userId` field. Includes `userId` (post owner) for authorization.",
+          "params": [
+            {
+              "name": "postId",
+              "description": "The unique identifier for the public media post."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/private_posts/{postId}",
+        "definition": {
+          "entityName": "MediaPost",
+          "schema": {
+            "$ref": "#/backend/entities/MediaPost"
+          },
+          "description": "Contains media posts explicitly marked as private (`isPrivate: true`). Readable, writable, and deletable only by the `userId` in the path (the post owner). The document's `userId` field MUST match the `{userId}` in the path.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user who owns this private post, matching Firebase Auth UID."
+            },
+            {
+              "name": "postId",
+              "description": "The unique identifier for the private media post."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/public_posts/{postId}/comments/{commentId}",
+        "definition": {
+          "entityName": "Comment",
+          "schema": {
+            "$ref": "#/backend/entities/Comment"
+          },
+          "description": "Comments on public media posts. Readable by all authenticated users. Writable by any authenticated user. Deletable by the comment's `userId` or the `postOwnerId`. Includes denormalized `postOwnerId` and `isPrivatePost: false` for authorization independence.",
+          "params": [
+            {
+              "name": "postId",
+              "description": "The unique identifier of the parent public media post."
+            },
+            {
+              "name": "commentId",
+              "description": "The unique identifier for the comment."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/private_posts/{postId}/comments/{commentId}",
+        "definition": {
+          "entityName": "Comment",
+          "schema": {
+            "$ref": "#/backend/entities/Comment"
+          },
+          "description": "Comments on private media posts. Readable, writable, and deletable only by the `userId` in the path (the post owner). Includes denormalized `postOwnerId` (matching path `userId`) and `isPrivatePost: true` for authorization independence.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user who owns the parent private post."
+            },
+            {
+              "name": "postId",
+              "description": "The unique identifier of the parent private media post."
+            },
+            {
+              "name": "commentId",
+              "description": "The unique identifier for the comment."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/public_posts/{postId}/likes/{likeId}",
+        "definition": {
+          "entityName": "Like",
+          "schema": {
+            "$ref": "#/backend/entities/Like"
+          },
+          "description": "Likes on public media posts. Readable by all authenticated users. Writable/deletable by the `userId` who created the like. Includes denormalized `postOwnerId` and `isPrivatePost: false` for authorization independence.",
+          "params": [
+            {
+              "name": "postId",
+              "description": "The unique identifier of the parent public media post."
+            },
+            {
+              "name": "likeId",
+              "description": "The unique identifier for the like."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/private_posts/{postId}/likes/{likeId}",
+        "definition": {
+          "entityName": "Like",
+          "schema": {
+            "$ref": "#/backend/entities/Like"
+          },
+          "description": "Likes on private media posts. Readable, writable, and deletable only by the `userId` in the path (the post owner). Includes denormalized `postOwnerId` (matching path `userId`) and `isPrivatePost: true` for authorization independence.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user who owns the parent private post."
+            },
+            {
+              "name": "postId",
+              "description": "The unique identifier of the parent private media post."
+            },
+            {
+              "name": "likeId",
+              "description": "The unique identifier for the like."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/conversations/{conversationId}",
+        "definition": {
+          "entityName": "Conversation",
+          "schema": {
+            "$ref": "#/backend/entities/Conversation"
+          },
+          "description": "Represents a private chat conversation. Accessible only to users whose `uid` is present in the `participantIds` array. `participantIds` serves as the membership map for authorization.",
+          "params": [
+            {
+              "name": "conversationId",
+              "description": "The unique identifier for the conversation."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/conversations/{conversationId}/messages/{messageId}",
+        "definition": {
+          "entityName": "ChatMessage",
+          "schema": {
+            "$ref": "#/backend/entities/ChatMessage"
+          },
+          "description": "Individual messages within a conversation. Accessible only to users who are `participantIds` of the parent `Conversation`. Includes denormalized `participantIds` (from parent `Conversation`) for authorization independence.",
+          "params": [
+            {
+              "name": "conversationId",
+              "description": "The unique identifier of the parent conversation."
+            },
+            {
+              "name": "messageId",
+              "description": "The unique identifier for the chat message."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "The Firestore structure for VibeShare is designed with a strong emphasis on Authorization Independence, Structural Segregation, and consistent Access Modeling to ensure robust security and efficient rule management. Firebase Authentication will manage user registration and login, with user profiles stored in Firestore and linked by their Firebase Auth UID.\n\n**Authorization Independence via Denormalization:**\nThis core principle is achieved by denormalizing authorization-critical fields into child documents. Specifically:\n*   For `Comment` and `Like` documents, the `postOwnerId` and `isPrivatePost` status of their parent `MediaPost` are copied into each comment/like document. This eliminates the need for security rules to perform `get()` operations on the parent `MediaPost` document to determine access rights.\n*   For `ChatMessage` documents, the `participantIds` array from the parent `Conversation` document is copied into each message. This allows message access rules to directly check `request.auth.uid` against the denormalized `participantIds` without requiring a `get()` on the parent conversation.\nThis strategy makes authorization checks atomic, preventing issues in transactions and ensuring rules are simple and debuggable.\n\n**Structural Segregation (Homogeneous Security Posture):**\nMedia posts are segregated into two distinct top-level collections based on their privacy status:\n*   `/public_posts`: Contains all `MediaPost` documents where `isPrivate` is `false`. These posts and their subcollections (comments, likes) are generally accessible for reading by all authenticated users, with specific write/delete permissions for owners.\n*   `/users/{userId}/private_posts`: Contains all `MediaPost` documents where `isPrivate` is `true`. These posts and their subcollections are strictly private to the `userId` in the path, making authorization rules straightforward and explicit.\nThis segregation avoids complex conditional logic within security rules for a single collection, adhering to the principle that all documents in a collection should share the same security requirements.\n\n**Access Modeling (QAPs - Rules are not Filters):**\nThe structure ensures that `list` operations are securely queryable. For instance:\n*   To retrieve a user's private posts, the client queries `/users/{request.auth.uid}/private_posts`, leveraging path-based ownership for automatic security.\n*   To retrieve public posts, the client queries `/public_posts`, which has a homogeneous security posture (readable by all authenticated users).\n*   For conversations, a user's conversations are retrieved using a `where('participantIds', 'array-contains', request.auth.uid)` query on the top-level `/conversations` collection. This is a secure and efficient query pattern that Firestore rules can enforce without acting as filters after data retrieval.\n\n**Summary:**\nThe overall design prioritizes explicit ownership, denormalized authorization context, and clear structural distinctions. This approach simplifies Firestore security rules, enhances debuggability, and ensures scalability by preventing expensive `get()` calls in rules and supporting efficient queries for common access patterns."
+  }
+}

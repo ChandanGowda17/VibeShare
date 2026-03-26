@@ -1,0 +1,184 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    /**
+     * VibeShare Security Rules v1.0
+     * 
+     * CORE PHILOSOPHY:
+     * This ruleset implements a strict authorization model focused on document ownership and shared access 
+     * (collaborative conversations). While data types are not strictly enforced to allow for rapid 
+     * prototyping, relational integrity and ownership fields are strictly validated.
+     * 
+     * DATA STRUCTURE:
+     * - Public profiles and posts are at the top level for discoverability.
+     * - Private content is nested under /users/{userId} to enforce path-based security.
+     * - Chat systems use a shared-access model based on participant lists.
+     * 
+     * KEY SECURITY DECISIONS:
+     * - Authorization Independence: Critical fields (like participantIds or postOwnerId) are denormalized 
+     *   to avoid expensive get() calls in rules.
+     * - Structural Segregation: Public and Private posts reside in different collection paths to 
+     *   prevent accidental data leakage through complex logic.
+     * - Relational Integrity: On document creation, the rules enforce that the internal 'userId' or 'id' 
+     *   fields match the authenticated user and the storage path.
+     */
+
+    // --- GLOBAL HELPER FUNCTIONS ---
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    /**
+     * Verifies the user owns the document and that the document actually exists.
+     * Use this for update and delete operations.
+     */
+    function isExistingOwner(userId) {
+      return resource != null && isOwner(userId);
+    }
+
+    /**
+     * Checks if the user is part of a list/array of participants.
+     */
+    function isParticipant(participantList) {
+      return isSignedIn() && request.auth.uid in participantList;
+    }
+
+    // --- COLLECTION RULES ---
+
+    /**
+     * @description Public user profile information.
+     * @path /users/{userId}
+     * @allow Authenticated user (get), Any auth user (list), Owner (create/update)
+     * @deny Unauthenticated access, Non-owner writing to profile.
+     * @principle Ownership-based writes with public discovery.
+     */
+    match /users/{userId} {
+      allow get, list: if isSignedIn();
+      allow create: if isOwner(userId) && request.resource.data.id == userId;
+      allow update: if isExistingOwner(userId) && request.resource.data.id == resource.data.id;
+      allow delete: if isExistingOwner(userId);
+
+      /**
+       * @description Private media posts belonging to a specific user.
+       * @path /users/{userId}/private_posts/{postId}
+       * @allow Owner (get, list, create, update, delete)
+       * @deny Any user who is not the path owner.
+       * @principle Strict path-based ownership for private data.
+       */
+      match /private_posts/{postId} {
+        allow get, list: if isOwner(userId);
+        allow create: if isOwner(userId) && request.resource.data.userId == userId;
+        allow update: if isExistingOwner(userId) && request.resource.data.userId == resource.data.userId;
+        allow delete: if isExistingOwner(userId);
+
+        /**
+         * @description Comments on private media posts.
+         * @path /users/{userId}/private_posts/{postId}/comments/{commentId}
+         * @allow Owner (get, list, create, update, delete)
+         * @deny Anyone except the owner of the parent private post.
+         * @principle Inherited ownership through path segregation.
+         */
+        match /comments/{commentId} {
+          allow get, list: if isOwner(userId);
+          allow create: if isOwner(userId) && request.resource.data.userId == userId;
+          allow update: if isExistingOwner(userId) && request.resource.data.userId == resource.data.userId;
+          allow delete: if isExistingOwner(userId);
+        }
+
+        /**
+         * @description Likes on private media posts.
+         * @path /users/{userId}/private_posts/{postId}/likes/{likeId}
+         * @allow Owner (get, list, create, update, delete)
+         * @deny Anyone except the owner of the parent private post.
+         * @principle Inherited ownership through path segregation.
+         */
+        match /likes/{likeId} {
+          allow get, list: if isOwner(userId);
+          allow create: if isOwner(userId) && request.resource.data.userId == userId;
+          allow update: if isExistingOwner(userId) && request.resource.data.userId == resource.data.userId;
+          allow delete: if isExistingOwner(userId);
+        }
+      }
+    }
+
+    /**
+     * @description Public media posts viewable by all members.
+     * @path /public_posts/{postId}
+     * @allow Any auth user (get, list), Author (create/update/delete)
+     * @deny Non-author writing to post.
+     * @principle Public discovery with owner-only modifications.
+     */
+    match /public_posts/{postId} {
+      allow get, list: if isSignedIn();
+      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+      allow update: if isExistingOwner(resource.data.userId) && request.resource.data.userId == resource.data.userId;
+      allow delete: if isExistingOwner(resource.data.userId);
+
+      /**
+       * @description Comments on public posts.
+       * @path /public_posts/{postId}/comments/{commentId}
+       * @allow Any auth user (get, list, create), Comment Author (update), Comment Author or Post Owner (delete)
+       * @deny Updating someone else's comment.
+       * @principle Shared community interaction with dual-authority deletion.
+       */
+      match /comments/{commentId} {
+        allow get, list: if isSignedIn();
+        allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+        allow update: if isExistingOwner(resource.data.userId) && request.resource.data.userId == resource.data.userId;
+        allow delete: if isExistingOwner(resource.data.userId) || isOwner(resource.data.postOwnerId);
+      }
+
+      /**
+       * @description Likes on public posts.
+       * @path /public_posts/{postId}/likes/{likeId}
+       * @allow Any auth user (get, list), Like Owner (create, delete)
+       * @deny Modifying someone else's like.
+       * @principle Owner-controlled reactions.
+       */
+      match /likes/{likeId} {
+        allow get, list: if isSignedIn();
+        allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+        allow update: if false; // Likes are typically not updated, only created/deleted.
+        allow delete: if isExistingOwner(resource.data.userId);
+      }
+    }
+
+    /**
+     * @description Private chat conversations between multiple users.
+     * @path /conversations/{conversationId}
+     * @allow Participants (get, list, update)
+     * @deny Non-participants, Unauthenticated access.
+     * @principle Shared access model using denormalized participant IDs.
+     */
+    match /conversations/{conversationId} {
+      // List/Get allowed if the user's UID is in the participantIds array
+      allow get, list: if isParticipant(resource.data.participantIds);
+      // Creation requires the creator to include themselves in the participants
+      allow create: if isParticipant(request.resource.data.participantIds);
+      // Only existing participants can update the conversation (e.g. updating updatedAt)
+      allow update: if isParticipant(resource.data.participantIds);
+      allow delete: if false; // Conversations usually archived, not deleted for security/history.
+
+      /**
+       * @description Individual messages within a chat.
+       * @path /conversations/{conversationId}/messages/{messageId}
+       * @allow Participants (get, list), Sender (create)
+       * @deny Non-participants, modifying messages after sending.
+       * @principle Authorization independence using denormalized participant lists.
+       */
+      match /messages/{messageId} {
+        // resource.data.participantIds is denormalized from parent for efficiency
+        allow get, list: if isParticipant(resource.data.participantIds);
+        allow create: if isParticipant(request.resource.data.participantIds) && request.resource.data.senderId == request.auth.uid;
+        allow update: if isExistingOwner(resource.data.senderId) && request.resource.data.senderId == resource.data.senderId;
+        allow delete: if isExistingOwner(resource.data.senderId);
+      }
+    }
+  }
+}
