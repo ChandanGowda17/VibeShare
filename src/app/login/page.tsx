@@ -30,12 +30,10 @@ export default function LoginPage() {
     e.preventDefault()
     setIsSubmitting(true)
     
-    // We don't await here as per non-blocking patterns, 
-    // but the utility now handles errors via toasts
     if (isLogin) {
       initiateEmailSignIn(auth, email, password)
     } else {
-      initiateEmailSignUp(auth, email, password)
+      initiateEmailSignUp(auth, email, password, name)
     }
     
     // Reset submission state after a short delay or let the auth observer handle it
