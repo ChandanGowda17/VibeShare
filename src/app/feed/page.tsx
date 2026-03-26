@@ -1,8 +1,12 @@
 "use client"
 
+import { useEffect } from "react"
+import { useRouter } from "next/navigation"
 import { Navbar, MobileNav } from "@/components/Navigation"
 import { PostCard } from "@/components/PostCard"
 import { CreatePost } from "@/components/CreatePost"
+import { useUser } from "@/firebase"
+import { Loader2 } from "lucide-react"
 
 const MOCK_POSTS = [
   {
@@ -56,6 +60,23 @@ const MOCK_POSTS = [
 ]
 
 export default function FeedPage() {
+  const { user, isUserLoading } = useUser()
+  const router = useRouter()
+
+  useEffect(() => {
+    if (!isUserLoading && !user) {
+      router.push("/login")
+    }
+  }, [user, isUserLoading, router])
+
+  if (isUserLoading || !user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-background pb-20 md:pb-0">
       <Navbar />

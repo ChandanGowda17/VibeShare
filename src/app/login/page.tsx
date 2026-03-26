@@ -1,26 +1,47 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { toast } from "@/hooks/use-toast"
-import { Sparkles, ArrowLeft } from "lucide-react"
+import { Sparkles, ArrowLeft, Loader2 } from "lucide-react"
 import Link from "next/link"
+import { useAuth, useUser, initiateEmailSignIn, initiateEmailSignUp } from "@/firebase"
 
 export default function LoginPage() {
   const [isLogin, setIsLogin] = useState(true)
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [name, setName] = useState("")
   const router = useRouter()
+  const auth = useAuth()
+  const { user, isUserLoading } = useUser()
+
+  useEffect(() => {
+    if (user && !isUserLoading) {
+      router.push("/feed")
+    }
+  }, [user, isUserLoading, router])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    toast({
-      title: isLogin ? "Welcome back!" : "Account created!",
-      description: "Redirecting you to your feed...",
-    })
-    setTimeout(() => router.push("/feed"), 1500)
+    
+    if (isLogin) {
+      initiateEmailSignIn(auth, email, password)
+    } else {
+      initiateEmailSignUp(auth, email, password)
+    }
+  }
+
+  if (isUserLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    )
   }
 
   return (
@@ -52,16 +73,35 @@ export default function LoginPage() {
               {!isLogin && (
                 <div className="space-y-2">
                   <Label htmlFor="name">Full Name</Label>
-                  <Input id="name" placeholder="John Doe" required />
+                  <Input 
+                    id="name" 
+                    placeholder="John Doe" 
+                    required 
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                  />
                 </div>
               )}
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
-                <Input id="email" type="email" placeholder="name@example.com" required />
+                <Input 
+                  id="email" 
+                  type="email" 
+                  placeholder="name@example.com" 
+                  required 
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="password">Password</Label>
-                <Input id="password" type="password" required />
+                <Input 
+                  id="password" 
+                  type="password" 
+                  required 
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
               </div>
             </CardContent>
             <CardFooter className="flex flex-col space-y-4">

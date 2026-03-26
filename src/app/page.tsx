@@ -2,14 +2,17 @@
 
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { Sparkles, Image as ImageIcon, Mic, Share2, ArrowRight } from "lucide-react"
+import { Sparkles, Image as ImageIcon, Mic, Share2 } from "lucide-react"
+import { useUser } from "@/firebase"
 
 export default function LandingPage() {
+  const { user } = useUser()
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
       {/* Hero Section */}
       <main className="flex-1 flex flex-col items-center justify-center px-4 text-center space-y-8 max-w-3xl mx-auto">
-        <div className="inline-flex p-4 rounded-3xl bg-primary/10 text-primary animate-bounce-slow">
+        <div className="inline-flex p-4 rounded-3xl bg-primary/10 text-primary animate-pulse">
           <Sparkles className="h-12 w-12" />
         </div>
         
@@ -27,12 +30,20 @@ export default function LandingPage() {
         </div>
 
         <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-          <Button asChild size="lg" className="h-14 px-8 text-lg font-bold rounded-2xl shadow-lg shadow-primary/20">
-            <Link href="/login">Get Started</Link>
-          </Button>
-          <Button asChild variant="outline" size="lg" className="h-14 px-8 text-lg font-bold rounded-2xl border-primary/20 hover:bg-primary/5">
-            <Link href="/login">Sign In</Link>
-          </Button>
+          {user ? (
+            <Button asChild size="lg" className="h-14 px-8 text-lg font-bold rounded-2xl shadow-lg shadow-primary/20">
+              <Link href="/feed">Go to Feed</Link>
+            </Button>
+          ) : (
+            <>
+              <Button asChild size="lg" className="h-14 px-8 text-lg font-bold rounded-2xl shadow-lg shadow-primary/20">
+                <Link href="/login">Get Started</Link>
+              </Button>
+              <Button asChild variant="outline" size="lg" className="h-14 px-8 text-lg font-bold rounded-2xl border-primary/20 hover:bg-primary/5">
+                <Link href="/login">Sign In</Link>
+              </Button>
+            </>
+          )}
         </div>
 
         {/* Feature Grid */}
