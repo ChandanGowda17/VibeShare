@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
-import { toast } from "@/hooks/use-toast"
 import { Sparkles, ArrowLeft, Loader2 } from "lucide-react"
 import Link from "next/link"
 import { useAuth, useUser, initiateEmailSignIn, initiateEmailSignUp } from "@/firebase"
@@ -16,6 +15,7 @@ export default function LoginPage() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [name, setName] = useState("")
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const router = useRouter()
   const auth = useAuth()
   const { user, isUserLoading } = useUser()
@@ -28,12 +28,18 @@ export default function LoginPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
+    setIsSubmitting(true)
     
+    // We don't await here as per non-blocking patterns, 
+    // but the utility now handles errors via toasts
     if (isLogin) {
       initiateEmailSignIn(auth, email, password)
     } else {
       initiateEmailSignUp(auth, email, password)
     }
+    
+    // Reset submission state after a short delay or let the auth observer handle it
+    setTimeout(() => setIsSubmitting(false), 2000)
   }
 
   if (isUserLoading) {
@@ -79,6 +85,7 @@ export default function LoginPage() {
                     required 
                     value={name}
                     onChange={(e) => setName(e.target.value)}
+                    disabled={isSubmitting}
                   />
                 </div>
               )}
@@ -91,6 +98,7 @@ export default function LoginPage() {
                   required 
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  disabled={isSubmitting}
                 />
               </div>
               <div className="space-y-2">
@@ -101,17 +109,26 @@ export default function LoginPage() {
                   required 
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  disabled={isSubmitting}
                 />
               </div>
             </CardContent>
             <CardFooter className="flex flex-col space-y-4">
-              <Button type="submit" className="w-full font-semibold h-11 text-lg">
-                {isLogin ? "Sign In" : "Get Started"}
+              <Button type="submit" className="w-full font-semibold h-11 text-lg" disabled={isSubmitting}>
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Processing...
+                  </>
+                ) : (
+                  isLogin ? "Sign In" : "Get Started"
+                )}
               </Button>
               <button 
                 type="button" 
                 onClick={() => setIsLogin(!isLogin)}
                 className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                disabled={isSubmitting}
               >
                 {isLogin ? "Don't have an account? Sign up" : "Already have an account? Sign in"}
               </button>
