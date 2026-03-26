@@ -4,15 +4,24 @@
 import { Navbar, MobileNav } from "@/components/Navigation"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
-import { Grid, Bookmark, Users, Settings, Loader2 } from "lucide-react"
+import { Grid, Bookmark, Users, Settings, Loader2, LogOut } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { useUser, useDoc, useMemoFirebase } from "@/firebase"
+import { useUser, useDoc, useMemoFirebase, useAuth, useFirestore } from "@/firebase"
 import { doc } from "firebase/firestore"
-import { useFirestore } from "@/firebase"
+import { signOut } from "firebase/auth"
+import { useRouter } from "next/navigation"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 export default function ProfilePage() {
   const { user, isUserLoading: isAuthLoading } = useUser()
   const db = useFirestore()
+  const auth = useAuth()
+  const router = useRouter()
 
   const userDocRef = useMemoFirebase(() => {
     if (!db || !user?.uid) return null
@@ -20,6 +29,15 @@ export default function ProfilePage() {
   }, [db, user?.uid])
 
   const { data: profile, isLoading: isProfileLoading } = useDoc(userDocRef)
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth)
+      router.push("/login")
+    } catch (error) {
+      console.error("Error signing out:", error)
+    }
+  }
 
   if (isAuthLoading || isProfileLoading) {
     return (
@@ -58,7 +76,23 @@ export default function ProfilePage() {
               <div className="flex items-center justify-center space-x-2">
                 <Button size="sm" variant="secondary" className="font-semibold">Edit Profile</Button>
                 <Button size="sm" variant="secondary" className="font-semibold">View Archive</Button>
-                <Button variant="ghost" size="icon"><Settings className="h-5 w-5" /></Button>
+                
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon">
+                      <Settings className="h-5 w-5" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem 
+                      onClick={handleLogout}
+                      className="text-destructive focus:text-destructive cursor-pointer"
+                    >
+                      <LogOut className="mr-2 h-4 w-4" />
+                      <span>Log out</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             </div>
 
