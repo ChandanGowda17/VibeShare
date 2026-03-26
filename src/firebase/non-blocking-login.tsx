@@ -1,3 +1,4 @@
+
 'use client';
 import {
   Auth,
@@ -36,9 +37,9 @@ export function initiateEmailSignUp(authInstance: Auth, email: string, password:
       const userRef = doc(db, 'users', user.uid);
       const profileData = {
         id: user.uid,
-        username: email.split('@')[0], // Default username from email
+        username: email.split('@')[0],
         email: email,
-        displayName: name, // Added for UI convenience, matches backend.json structure logic
+        displayName: name,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
         followerIds: [],
@@ -47,16 +48,21 @@ export function initiateEmailSignUp(authInstance: Auth, email: string, password:
         profilePictureUrl: `https://picsum.photos/seed/${user.uid}/200/200`
       };
 
-      setDoc(userRef, profileData, { merge: true }).catch((error) => {
-        errorEmitter.emit(
-          'permission-error',
-          new FirestorePermissionError({
-            path: userRef.path,
-            operation: 'create',
-            requestResourceData: profileData,
-          })
-        );
-      });
+      // We explicitly initiate the write and handle the error via the emitter
+      setDoc(userRef, profileData, { merge: true })
+        .then(() => {
+          console.log("Firestore profile created successfully for UID:", user.uid);
+        })
+        .catch((error) => {
+          errorEmitter.emit(
+            'permission-error',
+            new FirestorePermissionError({
+              path: userRef.path,
+              operation: 'create',
+              requestResourceData: profileData,
+            })
+          );
+        });
     })
     .catch((error: any) => {
       toast({

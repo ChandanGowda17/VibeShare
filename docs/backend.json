@@ -1,3 +1,4 @@
+
 {
   "entities": {
     "UserProfile": {
@@ -13,6 +14,10 @@
         "username": {
           "type": "string",
           "description": "A unique, public-facing username for the user."
+        },
+        "displayName": {
+          "type": "string",
+          "description": "The user's preferred display name."
         },
         "email": {
           "type": "string",
@@ -294,178 +299,59 @@
     ]
   },
   "firestore": {
-    "structure": [
-      {
-        "path": "/users/{userId}",
-        "definition": {
-          "entityName": "UserProfile",
-          "schema": {
-            "$ref": "#/backend/entities/UserProfile"
-          },
-          "description": "Stores public profile information for a user. The document ID (`userId`) MUST match the Firebase Authentication UID. Access: readable by all authenticated users, writable only by the profile owner (`request.auth.uid`)."
-        }
+    "/users/{userId}": {
+      "schema": {
+        "$ref": "#/entities/UserProfile"
       },
-      {
-        "path": "/public_posts/{postId}",
-        "definition": {
-          "entityName": "MediaPost",
-          "schema": {
-            "$ref": "#/backend/entities/MediaPost"
-          },
-          "description": "Contains media posts explicitly marked as public (`isPrivate: false`). Readable by all authenticated users. Writable/deletable by the post's `userId` field. Includes `userId` (post owner) for authorization.",
-          "params": [
-            {
-              "name": "postId",
-              "description": "The unique identifier for the public media post."
-            }
-          ]
-        }
+      "description": "Stores public profile information for a user. The document ID (`userId`) MUST match the Firebase Authentication UID. Access: readable by all authenticated users, writable only by the profile owner (`request.auth.uid`)."
+    },
+    "/public_posts/{postId}": {
+      "schema": {
+        "$ref": "#/entities/MediaPost"
       },
-      {
-        "path": "/users/{userId}/private_posts/{postId}",
-        "definition": {
-          "entityName": "MediaPost",
-          "schema": {
-            "$ref": "#/backend/entities/MediaPost"
-          },
-          "description": "Contains media posts explicitly marked as private (`isPrivate: true`). Readable, writable, and deletable only by the `userId` in the path (the post owner). The document's `userId` field MUST match the `{userId}` in the path.",
-          "params": [
-            {
-              "name": "userId",
-              "description": "The unique identifier of the user who owns this private post, matching Firebase Auth UID."
-            },
-            {
-              "name": "postId",
-              "description": "The unique identifier for the private media post."
-            }
-          ]
-        }
+      "description": "Contains media posts explicitly marked as public (`isPrivate: false`). Readable by all authenticated users. Writable/deletable by the post's `userId` field."
+    },
+    "/users/{userId}/private_posts/{postId}": {
+      "schema": {
+        "$ref": "#/entities/MediaPost"
       },
-      {
-        "path": "/public_posts/{postId}/comments/{commentId}",
-        "definition": {
-          "entityName": "Comment",
-          "schema": {
-            "$ref": "#/backend/entities/Comment"
-          },
-          "description": "Comments on public media posts. Readable by all authenticated users. Writable by any authenticated user. Deletable by the comment's `userId` or the `postOwnerId`. Includes denormalized `postOwnerId` and `isPrivatePost: false` for authorization independence.",
-          "params": [
-            {
-              "name": "postId",
-              "description": "The unique identifier of the parent public media post."
-            },
-            {
-              "name": "commentId",
-              "description": "The unique identifier for the comment."
-            }
-          ]
-        }
+      "description": "Contains media posts explicitly marked as private (`isPrivate: true`). Readable, writable, and deletable only by the `userId` in the path."
+    },
+    "/public_posts/{postId}/comments/{commentId}": {
+      "schema": {
+        "$ref": "#/entities/Comment"
       },
-      {
-        "path": "/users/{userId}/private_posts/{postId}/comments/{commentId}",
-        "definition": {
-          "entityName": "Comment",
-          "schema": {
-            "$ref": "#/backend/entities/Comment"
-          },
-          "description": "Comments on private media posts. Readable, writable, and deletable only by the `userId` in the path (the post owner). Includes denormalized `postOwnerId` (matching path `userId`) and `isPrivatePost: true` for authorization independence.",
-          "params": [
-            {
-              "name": "userId",
-              "description": "The unique identifier of the user who owns the parent private post."
-            },
-            {
-              "name": "postId",
-              "description": "The unique identifier of the parent private media post."
-            },
-            {
-              "name": "commentId",
-              "description": "The unique identifier for the comment."
-            }
-          ]
-        }
+      "description": "Comments on public media posts. Readable by all authenticated users. Writable by any authenticated user."
+    },
+    "/users/{userId}/private_posts/{postId}/comments/{commentId}": {
+      "schema": {
+        "$ref": "#/entities/Comment"
       },
-      {
-        "path": "/public_posts/{postId}/likes/{likeId}",
-        "definition": {
-          "entityName": "Like",
-          "schema": {
-            "$ref": "#/backend/entities/Like"
-          },
-          "description": "Likes on public media posts. Readable by all authenticated users. Writable/deletable by the `userId` who created the like. Includes denormalized `postOwnerId` and `isPrivatePost: false` for authorization independence.",
-          "params": [
-            {
-              "name": "postId",
-              "description": "The unique identifier of the parent public media post."
-            },
-            {
-              "name": "likeId",
-              "description": "The unique identifier for the like."
-            }
-          ]
-        }
+      "description": "Comments on private media posts. Accessible only by the post owner."
+    },
+    "/public_posts/{postId}/likes/{likeId}": {
+      "schema": {
+        "$ref": "#/entities/Like"
       },
-      {
-        "path": "/users/{userId}/private_posts/{postId}/likes/{likeId}",
-        "definition": {
-          "entityName": "Like",
-          "schema": {
-            "$ref": "#/backend/entities/Like"
-          },
-          "description": "Likes on private media posts. Readable, writable, and deletable only by the `userId` in the path (the post owner). Includes denormalized `postOwnerId` (matching path `userId`) and `isPrivatePost: true` for authorization independence.",
-          "params": [
-            {
-              "name": "userId",
-              "description": "The unique identifier of the user who owns the parent private post."
-            },
-            {
-              "name": "postId",
-              "description": "The unique identifier of the parent private media post."
-            },
-            {
-              "name": "likeId",
-              "description": "The unique identifier for the like."
-            }
-          ]
-        }
+      "description": "Likes on public media posts."
+    },
+    "/users/{userId}/private_posts/{postId}/likes/{likeId}": {
+      "schema": {
+        "$ref": "#/entities/Like"
       },
-      {
-        "path": "/conversations/{conversationId}",
-        "definition": {
-          "entityName": "Conversation",
-          "schema": {
-            "$ref": "#/backend/entities/Conversation"
-          },
-          "description": "Represents a private chat conversation. Accessible only to users whose `uid` is present in the `participantIds` array. `participantIds` serves as the membership map for authorization.",
-          "params": [
-            {
-              "name": "conversationId",
-              "description": "The unique identifier for the conversation."
-            }
-          ]
-        }
+      "description": "Likes on private media posts."
+    },
+    "/conversations/{conversationId}": {
+      "schema": {
+        "$ref": "#/entities/Conversation"
       },
-      {
-        "path": "/conversations/{conversationId}/messages/{messageId}",
-        "definition": {
-          "entityName": "ChatMessage",
-          "schema": {
-            "$ref": "#/backend/entities/ChatMessage"
-          },
-          "description": "Individual messages within a conversation. Accessible only to users who are `participantIds` of the parent `Conversation`. Includes denormalized `participantIds` (from parent `Conversation`) for authorization independence.",
-          "params": [
-            {
-              "name": "conversationId",
-              "description": "The unique identifier of the parent conversation."
-            },
-            {
-              "name": "messageId",
-              "description": "The unique identifier for the chat message."
-            }
-          ]
-        }
-      }
-    ],
-    "reasoning": "The Firestore structure for VibeShare is designed with a strong emphasis on Authorization Independence, Structural Segregation, and consistent Access Modeling to ensure robust security and efficient rule management. Firebase Authentication will manage user registration and login, with user profiles stored in Firestore and linked by their Firebase Auth UID.\n\n**Authorization Independence via Denormalization:**\nThis core principle is achieved by denormalizing authorization-critical fields into child documents. Specifically:\n*   For `Comment` and `Like` documents, the `postOwnerId` and `isPrivatePost` status of their parent `MediaPost` are copied into each comment/like document. This eliminates the need for security rules to perform `get()` operations on the parent `MediaPost` document to determine access rights.\n*   For `ChatMessage` documents, the `participantIds` array from the parent `Conversation` document is copied into each message. This allows message access rules to directly check `request.auth.uid` against the denormalized `participantIds` without requiring a `get()` on the parent conversation.\nThis strategy makes authorization checks atomic, preventing issues in transactions and ensuring rules are simple and debuggable.\n\n**Structural Segregation (Homogeneous Security Posture):**\nMedia posts are segregated into two distinct top-level collections based on their privacy status:\n*   `/public_posts`: Contains all `MediaPost` documents where `isPrivate` is `false`. These posts and their subcollections (comments, likes) are generally accessible for reading by all authenticated users, with specific write/delete permissions for owners.\n*   `/users/{userId}/private_posts`: Contains all `MediaPost` documents where `isPrivate` is `true`. These posts and their subcollections are strictly private to the `userId` in the path, making authorization rules straightforward and explicit.\nThis segregation avoids complex conditional logic within security rules for a single collection, adhering to the principle that all documents in a collection should share the same security requirements.\n\n**Access Modeling (QAPs - Rules are not Filters):**\nThe structure ensures that `list` operations are securely queryable. For instance:\n*   To retrieve a user's private posts, the client queries `/users/{request.auth.uid}/private_posts`, leveraging path-based ownership for automatic security.\n*   To retrieve public posts, the client queries `/public_posts`, which has a homogeneous security posture (readable by all authenticated users).\n*   For conversations, a user's conversations are retrieved using a `where('participantIds', 'array-contains', request.auth.uid)` query on the top-level `/conversations` collection. This is a secure and efficient query pattern that Firestore rules can enforce without acting as filters after data retrieval.\n\n**Summary:**\nThe overall design prioritizes explicit ownership, denormalized authorization context, and clear structural distinctions. This approach simplifies Firestore security rules, enhances debuggability, and ensures scalability by preventing expensive `get()` calls in rules and supporting efficient queries for common access patterns."
+      "description": "Represents a private chat conversation. Accessible only to participants."
+    },
+    "/conversations/{conversationId}/messages/{messageId}": {
+      "schema": {
+        "$ref": "#/entities/ChatMessage"
+      },
+      "description": "Individual messages within a conversation."
+    }
   }
 }
