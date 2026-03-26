@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useEffect } from "react"
@@ -5,8 +6,9 @@ import { useRouter } from "next/navigation"
 import { Navbar, MobileNav } from "@/components/Navigation"
 import { PostCard } from "@/components/PostCard"
 import { CreatePost } from "@/components/CreatePost"
-import { useUser } from "@/firebase"
-import { Loader2 } from "lucide-react"
+import { useUser, useDoc, useMemoFirebase, useFirestore } from "@/firebase"
+import { Loader2, Sparkles } from "lucide-react"
+import { doc } from "firebase/firestore"
 
 const MOCK_POSTS = [
   {
@@ -60,16 +62,24 @@ const MOCK_POSTS = [
 ]
 
 export default function FeedPage() {
-  const { user, isUserLoading } = useUser()
+  const { user, isUserLoading: isAuthLoading } = useUser()
+  const db = useFirestore()
   const router = useRouter()
 
+  const userDocRef = useMemoFirebase(() => {
+    if (!db || !user?.uid) return null
+    return doc(db, "users", user.uid)
+  }, [db, user?.uid])
+
+  const { data: profile, isLoading: isProfileLoading } = useDoc(userDocRef)
+
   useEffect(() => {
-    if (!isUserLoading && !user) {
+    if (!isAuthLoading && !user) {
       router.push("/login")
     }
-  }, [user, isUserLoading, router])
+  }, [user, isAuthLoading, router])
 
-  if (isUserLoading || !user) {
+  if (isAuthLoading || (user && isProfileLoading)) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -77,12 +87,26 @@ export default function FeedPage() {
     )
   }
 
+  if (!user) return null
+
+  const displayName = profile?.displayName || user?.displayName || "Creator"
+
   return (
     <div className="min-h-screen bg-background pb-20 md:pb-0">
       <Navbar />
       
       <main className="mx-auto max-w-screen-md px-4 py-6">
         <div className="flex flex-col gap-6">
+          <div className="flex items-center gap-3 px-2">
+            <div className="p-2 bg-primary/10 rounded-xl">
+              <Sparkles className="h-5 w-5 text-primary" />
+            </div>
+            <div>
+              <h1 className="text-xl font-bold">Good morning, {displayName.split(' ')[0]}!</h1>
+              <p className="text-xs text-muted-foreground">Ready to share your vibe today?</p>
+            </div>
+          </div>
+
           {/* Stories placeholder */}
           <div className="flex space-x-4 overflow-x-auto pb-4 no-scrollbar">
             {Array.from({ length: 8 }).map((_, i) => (
