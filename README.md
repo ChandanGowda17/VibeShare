@@ -51,10 +51,13 @@ git commit -m "Update project features"
 git push origin main
 ```
 
+### 💡 Troubleshooting Git "Rejected" Pushes
+If you see an error like `! [rejected] main -> main (fetch first)`, it means the remote repository has changes you don't have yet. Run:
+```bash
+git pull origin main --rebase
+git push origin main
+```
+
 ## 📄 License
 
 This project is licensed under the MIT License.
-
-git add .
-git commit -m "Integrate Firebase Auth, Firestore profiles, and logout functionality"
-git push origin main
