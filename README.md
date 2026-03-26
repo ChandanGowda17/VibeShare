@@ -54,3 +54,7 @@ git push origin main
 ## 📄 License
 
 This project is licensed under the MIT License.
+
+git add .
+git commit -m "Integrate Firebase Auth, Firestore profiles, and logout functionality"
+git push origin main
